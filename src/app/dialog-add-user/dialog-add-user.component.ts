@@ -4,7 +4,9 @@ import { MatDialogActions, MatDialogContent, MatDialogTitle } from '@angular/mat
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import {MatDatepickerModule} from '@angular/material/datepicker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { User } from '../model/user.class';
+import { log } from 'console';
 
 @Component({
   selector: 'app-dialog-add-user',
@@ -22,5 +24,15 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
   styleUrl: './dialog-add-user.component.scss'
 })
 export class DialogAddUserComponent {
+  user = new User();
+  birthDate!: Date;
 
+  saveUser() {
+    if (this.birthDate) {
+      console.log('vorhanden', this.birthDate);
+      
+    }
+    this.user.birthDate = this.birthDate.getTime();
+    console.log(this.user);
+  }
 }

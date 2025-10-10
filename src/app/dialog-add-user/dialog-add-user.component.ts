@@ -1,20 +1,22 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogActions, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
-import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { Firestore, collection, addDoc } from '@angular/fire/firestore';
 import { User } from '../model/user.class';
-import { addDoc, collection, collectionData, Firestore } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-dialog-add-user',
+  standalone: true, // ✅ WICHTIG!
   imports: [
-    MatFormFieldModule,
+    CommonModule,
     FormsModule,
+    MatFormFieldModule,
     MatButtonModule,
     MatDialogTitle,
     MatDialogContent,
@@ -24,29 +26,27 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
     MatProgressBarModule
   ],
   templateUrl: './dialog-add-user.component.html',
-  styleUrl: './dialog-add-user.component.scss'
+  styleUrls: ['./dialog-add-user.component.scss'] // ✅ Plural
 })
 export class DialogAddUserComponent {
   user = new User();
   birthDate!: Date;
+  loading = false;
 
-  // Observable für alle User
-  users$!: Observable<User[]>;
-
-  constructor(private firestore: Firestore) {
-    const usersRef = collection(this.firestore, 'users');
-    this.users$ = collectionData(usersRef, { idField: 'id' }) as Observable<User[]>;
-  }
+  constructor(private firestore: Firestore) {}
 
   async saveUser() {
-    const usersCollection = collection(this.firestore, 'users');
+    this.loading = true;
 
-    // 3. Geburtstdatum speichern (Timestamp)
-    this.user.birthDate = this.birthDate.getTime();
-
-    // 4. Speichern in Firestore
-    await addDoc(usersCollection, { ...this.user });
-
-    console.log('User gespeichert:', this.user);
+    try {
+      const usersCollection = collection(this.firestore, 'users');
+      this.user.birthDate = this.birthDate.getTime();
+      await addDoc(usersCollection, { ...this.user });
+      console.log('✅ User gespeichert:', this.user);
+    } catch (error) {
+      console.error('❌ Fehler beim Speichern:', error);
+    } finally {
+      this.loading = false;
+    }
   }
 }
